@@ -1,5 +1,6 @@
 const c = document.getElementById('c')
 const ctx = c.getContext('2d')
+const over = document.getElementById('over')
 
 function fit() {
   c.width = innerWidth
@@ -27,7 +28,7 @@ const clouds = [
 ]
 
 const x = 700
-const size = 115
+const size = 135
 let y = 300
 let v = 0
 const gravity = 0.5
@@ -36,6 +37,8 @@ const jump = -8
 const ps = 5
 let poles = []
 let timer = 0
+let dead = false
+let dieAt = 0
 
 function spawn() {
   const gap = c.height * 0.3
@@ -45,10 +48,53 @@ function spawn() {
 
 function pole(px, len) {
   ctx.drawImage(poleImg, 14, 16, 34, 10, px, 0, 34 * ps, 10 * ps)
-    ctx.drawImage(poleImg, 20, 40, 21, 1, px + 6 * ps, 10 * ps, 21 * ps, Math.max(0, len - 10 * ps))
+  ctx.drawImage(poleImg, 20, 40, 21, 1, px + 6 * ps, 10 * ps, 21 * ps, Math.max(0, len - 10 * ps))
 }
 
-function flap() { v = jump }
+function die() {
+  if (dead) return
+  dead = true
+  dieAt = Date.now()
+  over.classList.remove('off')
+}
+
+function reset() {
+  y = 300
+  v = 0
+  poles = []
+  timer = 0
+  dead = false
+  over.classList.add('off')
+}
+
+function overlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by
+}
+
+function hit(p) {
+  const bx = x + 20
+  const by = y + 20
+  const bs = size - 40
+  const cw = 34 * ps
+  const ch = 10 * ps
+  const bodyX = p.x + 6 * ps
+  const bodyW = 21 * ps
+  const lo = p.top + p.gap
+  return (
+    overlap(bx, by, bs, bs, p.x, p.top - ch, cw, ch) ||
+    overlap(bx, by, bs, bs, bodyX, 0, bodyW, p.top - ch) ||
+    overlap(bx, by, bs, bs, p.x, lo, cw, ch) ||
+    overlap(bx, by, bs, bs, bodyX, lo + ch, bodyW, c.height - lo - ch)
+  )
+}
+
+function flap() {
+  if (dead) {
+    if (Date.now() - dieAt > 500) reset()
+    return
+  }
+  v = jump
+}
 
 function loop() {
   ctx.fillStyle = '#8af5f4'
@@ -62,33 +108,37 @@ function loop() {
     ctx.drawImage(sheet, cl.sx, cl.sy, cl.w, cl.h, cl.x, cl.y * c.height, cl.w * k, cl.h * k)
   }
 
-  timer++
-  if (timer % 160 === 0) spawn()
+  if (!dead) {
+    timer++
+    if (timer % 160 === 0) spawn()
+  }
 
-    for (const p of poles) {
-      p.x -= 4
+  for (const p of poles) {
+    if (!dead) p.x -= 4
 
-      ctx.save()
-      ctx.translate(0, p.top)
-      ctx.scale(1, -1)
-      pole(p.x, p.top)
-      ctx.restore()
+    ctx.save()
+    ctx.translate(0, p.top)
+    ctx.scale(1, -1)
+    pole(p.x, p.top)
+    ctx.restore()
 
-      ctx.save()
-      ctx.translate(0, p.top + p.gap)
-      pole(p.x, c.height - p.top - p.gap)
-      ctx.restore()
-    }
-    poles = poles.filter(p => p.x > -34 * ps)
+    ctx.save()
+    ctx.translate(0, p.top + p.gap)
+    pole(p.x, c.height - p.top - p.gap)
+    ctx.restore()
+  }
+  poles = poles.filter(p => p.x > -34 * ps)
 
   v += gravity
   y += v
 
-  if (y > c.height - size) { y = c.height - size; v = 0 }
+  if (y > c.height - size) { y = c.height - size; v = 0; die() }
   if (y < 0) { y = 0; v = 0 }
+  if (!dead) for (const p of poles) if (hit(p)) die()
 
   const f = v < 0 ? 32 : 0
   ctx.drawImage(img, 0, f, 32, 32, x, y, size, size)
+
   requestAnimationFrame(loop)
 }
 

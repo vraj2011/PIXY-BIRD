@@ -9,3 +9,31 @@ canvas {
   background: #8fd3f4;
   image-rendering: pixelated;
 }
+
+#over {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  user-select: none;
+}
+
+#over.off{
+  display: none;
+}
+
+h1 {
+  font-size: 5vw;
+  margin: 0 0 30px;
+  text-shadow: 6px 6px 0 #000;
+}
+
+p {
+  font-size: 20px;
+  margin: 0;
+}
