@@ -3,6 +3,8 @@ const ctx = c.getContext('2d')
 const over = document.getElementById('over')
 const scoreEl = document.getElementById('score')
 const res = document.getElementById('res')
+const hint = document.getElementById('hint')
+
 let score = 0
 let best = Number(localStorage.getItem('best')) || 0
 
@@ -40,14 +42,25 @@ const jump = -8
 
 const ps = 5
 let poles = []
-let timer = 0
+let started = false
+const space = 640
 let dead = false
 let dieAt = 0
+let last = performance.now()
 
-function spawn() {
+function spawn(px = c.width) {
   const gap = c.height * 0.3
   const top = c.height * 0.1 + Math.random() * (c.height * 0.8 - gap)
-  poles.push({ x: c.width, top, gap, passed: false })
+  poles.push({ x: px, top, gap, passed: false })
+}
+
+function seed() {
+  poles = []
+  let px = x + 400
+  do {
+    spawn(px)
+    px += space
+  } while (px < c.width)
 }
 
 function pole(px, len) {
@@ -70,12 +83,13 @@ function die() {
 function reset() {
   y = 300
   v = 0
-  poles = []
-  timer = 0
   dead = false
+  started = false
   score = 0
   scoreEl.textContent = 0
   over.classList.add('off')
+  seed()
+  hint.classList.remove('off')
 }
 
 function overlap(ax, ay, aw, ah, bx, by, bw, bh) {
@@ -104,28 +118,32 @@ function flap() {
     if (Date.now() - dieAt > 500) reset()
     return
   }
+  started = true
+  hint.classList.add('off')
   v = jump
 }
 
-function loop() {
+function loop(t) {
+  const dt = Math.min((t - last) / 16.67, 3)
+  last = t
   ctx.fillStyle = '#8af5f4'
   ctx.fillRect(0, 0, c.width, c.height)
 
   ctx.drawImage(sheet, 144, 4, 13, 12, c.width - 140, 40, 13 * k, 12 * k)
 
   for (const cl of clouds) {
-    cl.x -= cl.s
+    cl.x -= cl.s * dt
     if (cl.x < -cl.w * k) cl.x = c.width
     ctx.drawImage(sheet, cl.sx, cl.sy, cl.w, cl.h, cl.x, cl.y * c.height, cl.w * k, cl.h * k)
   }
 
-  if (!dead) {
-    timer++
-    if (timer % 160 === 0) spawn()
-  }
+  if (started && !dead) {
+  const last = poles[poles.length - 1]
+  if (!last || last.x < c.width - space) spawn()
+}
 
   for (const p of poles) {
-    if (!dead) p.x -= 4
+   if (started && !dead) p.x -= 4 * dt
 
     if (!dead && !p.passed && p.x + 34 * ps < x) {
       p.passed = true
@@ -146,10 +164,14 @@ function loop() {
   }
   poles = poles.filter(p => p.x > -34 * ps)
 
-  v += gravity
-  y += v
+if (started) {
+  v += gravity * dt
+  y += v * dt
+} else {
+  y = 300 + Math.sin(t / 200) * 10
+}
 
-  if (y > c.height - size) { y = c.height - size; v = 0; die() }
+ if (started && y > c.height - size) { y = c.height - size; v = 0; die() }
   if (y < 0) { y = 0; v = 0 }
   if (!dead) for (const p of poles) if (hit(p)) die()
 
@@ -168,4 +190,5 @@ addEventListener('keydown', e => {
   }
 })
 
-img.onload = loop
+seed()
+img.onload = () => requestAnimationFrame(loop)

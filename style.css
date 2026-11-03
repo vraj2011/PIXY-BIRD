@@ -56,3 +56,27 @@ p {
   pointer-events: none;
   user-select: none;
 }
+
+#hint {
+    position: fixed;
+    bottom: 12vh;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    color: #fff;
+    text-shadow: 4px 4px 0 #000;
+    pointer-events: none;
+    user-select: none;
+    animation: blink 1s step(1) infinite;
+}
+
+#hint.off {
+  display: none;
+}
+
+@keyframes blink {
+  50% { opacity: 0;}
+
+}
