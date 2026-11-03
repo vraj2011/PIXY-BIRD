@@ -23,7 +23,7 @@ canvas {
   user-select: none;
 }
 
-#over.off{
+#over.off {
   display: none;
 }
 
@@ -36,4 +36,23 @@ h1 {
 p {
   font-size: 20px;
   margin: 0;
+}
+
+#res {
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+#score {
+  position: fixed;
+  top: 30px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 64px;
+  color: #fff;
+  text-shadow: 6px 6px 0 #000;
+  pointer-events: none;
+  user-select: none;
 }

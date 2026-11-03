@@ -1,6 +1,10 @@
 const c = document.getElementById('c')
 const ctx = c.getContext('2d')
 const over = document.getElementById('over')
+const scoreEl = document.getElementById('score')
+const res = document.getElementById('res')
+let score = 0
+let best = Number(localStorage.getItem('best')) || 0
 
 function fit() {
   c.width = innerWidth
@@ -43,7 +47,7 @@ let dieAt = 0
 function spawn() {
   const gap = c.height * 0.3
   const top = c.height * 0.1 + Math.random() * (c.height * 0.8 - gap)
-  poles.push({ x: c.width, top, gap })
+  poles.push({ x: c.width, top, gap, passed: false })
 }
 
 function pole(px, len) {
@@ -55,6 +59,11 @@ function die() {
   if (dead) return
   dead = true
   dieAt = Date.now()
+  if (score > best) {
+    best = score
+    localStorage.setItem('best', best)
+  }
+  res.textContent = 'SCORE ' + score + '  BEST ' + best
   over.classList.remove('off')
 }
 
@@ -64,6 +73,8 @@ function reset() {
   poles = []
   timer = 0
   dead = false
+  score = 0
+  scoreEl.textContent = 0
   over.classList.add('off')
 }
 
@@ -115,6 +126,12 @@ function loop() {
 
   for (const p of poles) {
     if (!dead) p.x -= 4
+
+    if (!dead && !p.passed && p.x + 34 * ps < x) {
+      p.passed = true
+      score++
+      scoreEl.textContent = score
+    }
 
     ctx.save()
     ctx.translate(0, p.top)
