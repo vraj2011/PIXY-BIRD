@@ -6,6 +6,30 @@ const res = document.getElementById('res')
 const hint = document.getElementById('hint')
 
 let score = 0
+let muted = false
+let audio
+
+function sound(f1, f2, dur, type, vol) {
+if (muted) return
+audio = audio || new AudioContext()
+if (audio.state === 'suspended') audio.resume()
+
+const t = audio.currentTime
+const o = audio.createOscillator()
+const g = audio.createGain()
+
+o.type = type
+o.frequency.setValueAtTime(f1, t)
+  o.frequency.exponentialRampToValueAtTime(f2, t + dur)
+  g.gain.setValueAtTime(vol, t)
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur)
+  o.connect(g)
+  g.connect(audio.destination)
+  o.start(t)
+  o.stop(t + dur)
+}
+
+
 let best = Number(localStorage.getItem('best')) || 0
 
 function fit() {
@@ -71,6 +95,7 @@ function pole(px, len) {
 function die() {
   if (dead) return
   dead = true
+  sound(300, 60, 0.5, 'sawtooth', 0.12)
   dieAt = Date.now()
   if (score > best) {
     best = score
@@ -121,6 +146,7 @@ function flap() {
   started = true
   hint.classList.add('off')
   v = jump
+  sound(400, 700, 0.12, 'square', 0.08)
 }
 
 function loop(t) {
@@ -149,6 +175,7 @@ function loop(t) {
       p.passed = true
       score++
       scoreEl.textContent = score
+      sound(880, 1320, 0.15, 'square', 0.08)
     }
 
     ctx.save()
@@ -184,6 +211,7 @@ if (started) {
 addEventListener('click', flap)
 addEventListener('keydown', e => {
   if (e.repeat) return
+  if (e.code === 'KeyM') muted = !muted
   if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
     e.preventDefault()
     flap()
