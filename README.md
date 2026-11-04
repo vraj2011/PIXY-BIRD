@@ -1,8 +1,0 @@
-# PIXY BIRD
-- PIXY BIRD IS A FLAPPY BIRD KINDA GAME 
-- IT IS MADE IN PIXEL ART 
-
-
-
-- DATA
-{{ wakatimeDoubleCategoryBar "Languages:" wakatimeData.Languages "Projects:" wakatimeData.Projects 5 }}

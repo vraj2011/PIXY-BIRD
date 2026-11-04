@@ -4,6 +4,8 @@ const over = document.getElementById('over')
 const scoreEl = document.getElementById('score')
 const res = document.getElementById('res')
 const hint = document.getElementById('hint')
+const intro = document.getElementById('intro')
+let showIntro = true
 
 let score = 0
 
@@ -158,6 +160,11 @@ function hit(p) {
 }
 
 function flap() {
+  if (showIntro) {
+  showIntro = false
+  intro.classList.add('off')
+  return
+} 
   if (dead) {
     if (Date.now() - dieAt > 500) reset()
     return

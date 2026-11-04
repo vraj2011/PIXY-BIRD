@@ -10,7 +10,7 @@ canvas {
   image-rendering: pixelated;
 }
 
-#over {
+#over , #intro {
   position: fixed;
   inset: 0;
   display: flex;
@@ -23,7 +23,7 @@ canvas {
   user-select: none;
 }
 
-#over.off {
+#over.off , #intro.off {
   display: none;
 }
 
@@ -97,4 +97,47 @@ p {
 
 #mute:hover {
   background: #222;
+}
+
+#intro {
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+#card {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 30px 40px;
+  margin: 40px 0;
+  border: 6px solid #fff;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 8px 8px 0 #000;
+}
+
+#mr {
+  width: 128px;
+  height: 128px;
+  background: url('PARROT.png') 0 0 /128px 256px;
+  image-rendering: pixelated;
+  animation: wing 0.5s steps(1) infinite;
+}
+
+@keyframes wing {
+  50% { background-position: 0 -128px; }
+}
+
+#card h2 {
+  font-size: 28px;
+  margin: 0 0 20px;
+  color: #8fd36a;
+}
+
+#info p {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.go {
+  animation: blink 1s step(1) infinite;
 }
