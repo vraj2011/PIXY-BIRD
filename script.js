@@ -6,7 +6,26 @@ const res = document.getElementById('res')
 const hint = document.getElementById('hint')
 
 let score = 0
-let muted = false
+
+const muteBtn = document.getElementById('mute')
+let muted = localStorage.getItem('muted') === '1'
+function paintMute() {
+  muteBtn.textContent = muted ? 'SOUND OFF' : 'SOUND ON'
+}
+
+function toggleMute() {
+  muted = !muted
+  localStorage.setItem('muted', muted ? '1' : '0')
+  paintMute()
+}
+
+paintMute()
+muteBtn.addEventListener('click', e=> {
+  e.stopPropagation()
+  toggleMute()
+  muteBtn.blur()
+})
+
 let audio
 
 function sound(f1, f2, dur, type, vol) {
@@ -211,7 +230,7 @@ if (started) {
 addEventListener('click', flap)
 addEventListener('keydown', e => {
   if (e.repeat) return
-  if (e.code === 'KeyM') muted = !muted
+if (e.code === 'KeyM') toggleMute()
   if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
     e.preventDefault()
     flap()
